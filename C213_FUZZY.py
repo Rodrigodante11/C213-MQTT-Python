@@ -44,17 +44,17 @@ class Fuzzy:
         """
         # Definição das variáveis envolvidas no sistema
         # Antecedente (Var. de Entrada):
-        erro = sistema.Antecedent(np.arange(-35, 35, 1), 'erro')
+        erro = sistema.Antecedent(np.arange(-28, 13, 1), 'erro')
         varerro = sistema.Antecedent(np.arange(-2, 2, 0.1), 'varerro')
 
         # Consequente (Var. de Saída):
         resistencia = sistema.Consequent(np.arange(0, 101, 1), 'resistencia')
         # Erro:
-        erro['MN'] = fuzz.trapmf(erro.universe, [-35, -35, -2, -1])
+        erro['MN'] = fuzz.trapmf(erro.universe, [-28, -28, -2, -1])
         erro['PN'] = fuzz.trimf(erro.universe, [-2, -1, 0])
         erro['Z'] = fuzz.trimf(erro.universe, [-1, 0, 1])
         erro['PP'] = fuzz.trimf(erro.universe, [0, 1, 2])
-        erro['MP'] = fuzz.trapmf(erro.universe, [1, 2, 35, 35])
+        erro['MP'] = fuzz.trapmf(erro.universe, [1, 2, 13, 13])
 
         # VarErro
         varerro['MN'] = fuzz.trapmf(varerro.universe, [-2, -2, -0.2, -0.1])
@@ -124,7 +124,7 @@ class Fuzzy:
         """
         new_setpoint = str(message.payload)
         self.temp = new_setpoint.replace('b', '').replace("'", '')
-        print("Temperatura: " + self.temp)
+        print("Temperatura setada: " + self.temp)
         self.setpoint_changed = int(self.temp)
 
     def publish(self, client):
@@ -138,21 +138,23 @@ class Fuzzy:
             self.erro_anterior = self.erro_atual
             self.erro_atual = self.pv - self.setpoint_changed
             delta_erro = self.erro_atual - self.erro_anterior
-            pot = self.calculafuzzy(self.erro_atual, delta_erro)
+            res = self.calculafuzzy(self.erro_atual, delta_erro)
             print(" ----------------------------")
             print("|  Tabela de Resposta        |")
             print(f"| Erro anterior: {self.erro_anterior:.3f}       |")
             print(f"| Erro atual: {self.erro_atual:.3f}          |")
-            print(f"| Potência Atual: {pot:.3f}     |")
+            print(f"| Resistencia Atual: {res:.3f}     |")
             print(f"| Delta Erro Atual: {delta_erro:.3f}    |")
             print(f"| Set Point Atual: {self.setpoint_changed:.3f}    |")
             print(f"| Temperatura Atual: {self.pv:.3f}  |")
             print(" ----------------------------")
 
-            for i in range(10): # mudar a temperatura de tempo em tempo criando uma potencia nova sem isso a
-                # variaçao fica muito pequena , nem avendo muita mudança
-                self.pv = (self.pv * 0.9954) + (pot * 0.002763)
+            i = 0
+            while (i < 10): # mudar a temperatura de tempo em tempo criando uma resistencia nova sem isso a
+                # variaçao fica muito pequena , nao tendo muita mudança
+                self.pv = self.pv * 0.9954 + res * 0.002763
                 time.sleep(1)
+                i += 1
 
 
 def run():
