@@ -139,15 +139,18 @@ class Fuzzy:
             self.erro_atual = self.pv - self.setpoint_changed
             delta_erro = self.erro_atual - self.erro_anterior
             pot = self.calculafuzzy(self.erro_atual, delta_erro)
-            print(f"Erro anterior: {self.erro_anterior:.2f}")
-            print(f"Erro atual: {self.erro_atual:.2f}")
-            print(f"Delta erro: {delta_erro:.2f}")
-            print(f"Potência: {pot:.2f}")
-            print(f"Set Point: {self.setpoint_changed:.2f}")
-            print(f"Temperatura Atual: {self.pv:.2f}")
-            print("------------------------------------")
+            print(" ----------------------------")
+            print("|  Tabela de Resposta        |")
+            print(f"| Erro anterior: {self.erro_anterior:.3f}       |")
+            print(f"| Erro atual: {self.erro_atual:.3f}          |")
+            print(f"| Potência Atual: {pot:.3f}     |")
+            print(f"| Delta Erro Atual: {delta_erro:.3f}    |")
+            print(f"| Set Point Atual: {self.setpoint_changed:.3f}    |")
+            print(f"| Temperatura Atual: {self.pv:.3f}  |")
+            print(" ----------------------------")
 
-            for i in range(11):
+            for i in range(10): # mudar a temperatura de tempo em tempo criando uma potencia nova sem isso a
+                # variaçao fica muito pequena , nem avendo muita mudança
                 self.pv = (self.pv * 0.9954) + (pot * 0.002763)
                 time.sleep(1)
 
